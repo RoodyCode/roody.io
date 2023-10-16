@@ -1,0 +1,103 @@
+---
+title: 'Setup Nextcloud with Docker & Docker Compose'
+description: Learn how to install Nextcloud with Docker Compose for maximum performance with this step-by-step guide.
+image: /images/blog/post-2.jpg
+date: 2023-07-05
+---
+
+<Callout>
+  This blog post assumes basic knowledge of Docker and Docker Compose. If you are new to
+  Docker, it is recommended to familiarize yourself with the basic concepts before
+  proceeding with this installation.
+</Callout>
+
+Nextcloud is a popular open-source self-hosted cloud storage and file synchronization solution. With Docker and Docker Compose, you can easily set up Nextcloud on your server while optimizing it for maximum performance. In this guide, we will walk you through the process of installing Nextcloud using Docker Compose, with a docker-compose.yml file optimized for performance. This installation method is also compatible with Raspberry Pi devices.
+
+## Prerequisites
+
+Before proceeding, make sure you have the following prerequisites:
+
+- Docker installed on your system
+- Docker Compose installed on your system
+
+## Step 1: Create the Docker Compose File
+
+Create a new file named docker-compose.yml and open it in a text editor. Paste the following content into the file:
+
+```yaml
+version: '3.7'
+
+networks:
+  nextcloud-net:
+    name: nextcloud-net
+    external: false
+volumes:
+  nextcloud:
+  nextcloud-db:
+  nextcloud-redis:
+services:
+  nextcloud-redis: # Redis
+    container_name: nextcloud-redis
+    image: redis:latest
+    restart: always
+    volumes:
+      - nextcloud-redis:/var/lib/redis
+    command: redis-server --requirepass YOUR_REDIS_PASSWORD
+    networks:
+      - nextcloud-net
+  nextcloud-db: # MariaDB
+    container_name: nextcloud-db
+    image: mariadb:latest
+    restart: always
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW --innodb-file-per-table=1 --skip-innodb-read-only-compressed
+    volumes:
+      - nextcloud-db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=YOUR_MYSQL_PASSWORD
+      - MYSQL_PASSWORD=YOUR_MYSQL_PASSWORD
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+    networks:
+      - nextcloud-net
+  nextcloud: # Nextcloud
+    container_name: nextcloud
+    image: nextcloud:latest
+    restart: always
+    ports:
+      - '8080:80'
+    volumes:
+      - nextcloud:/var/www/html
+    environment:
+      - MYSQL_PASSWORD=YOUR_MYSQL_PASSWORD
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_HOST=nextcloud-db
+      - PHP_UPLOAD_LIMIT=0
+      - PHP_MEMORY_LIMIT=8G
+      - REDIS_HOST=nextcloud-redis
+      - REDIS_HOST_PASSWORD=YOUR_REDIS_PASSWORD
+    networks:
+      - nextcloud-net
+```
+
+Make sure to replace YOUR_REDIS_PASSWORD and YOUR_MYSQL_PASSWORD with secure passwords of your choice. These passwords will be used for the Redis and MariaDB services.
+
+## Step 2: Start the Nextcloud Installation
+
+Open a terminal or command prompt and navigate to the directory where you saved the docker-compose.yml file. Run the following command to start the Nextcloud installation:
+
+```bash
+docker compose up -d
+```
+
+This command will download the required Docker images and start the Nextcloud, MariaDB, and Redis containers in the background.
+
+## Step 3: Access Nextcloud
+
+Once the containers are up and running, you can access Nextcloud by opening a web browser and entering the following URL:
+
+`http://YOUR_IP_OR_DOMAIN:8080`
+
+## Conclusion
+
+Congratulations! You have successfully installed Nextcloud using Docker Compose with an optimized configuration for maximum performance. Docker simplifies the deployment and management of Nextcloud, allowing you to focus on securely accessing and sharing your files. Remember to follow best practices for data backup and security to ensure the safety of your Nextcloud installation. Enjoy your self-hosted cloud storage and collaboration platform!
