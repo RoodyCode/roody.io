@@ -18,8 +18,20 @@ export default function Projects() {
 
       <div className="flex gap-3 flex-row flex-wrap">
         <ProjectCard
+          description="My personal portfolio website built using React, Next.js, Shadcn-ui and Typescript"
+          title="Roody.io"
+        />
+        <ProjectCard
           description="Simple web interface for managing Go-eCharger"
           title="go-e Charger Web App"
+        />
+        <ProjectCard
+          description="Personal hub for keeping an eye on a Raspberry Pi's performance."
+          title="Pi-Panel"
+        />
+        <ProjectCard
+          description="Lightweight self-hosted dyndns/dynamic DNS server and updater"
+          title="Node-DynDNS "
         />
       </div>
     </div>
